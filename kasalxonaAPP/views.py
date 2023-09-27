@@ -11,29 +11,20 @@ from .serializers import *
 class XonalarAPIView(APIView):
     def get(self, request):
         xonalar = Xona.objects.all()
+        qarovchisi = request.query_params.get("qarovchi")
+        if qarovchisi:
+            xonalar = Xona.objects.filter(bosh_joy_soni__gt=1)
+        else:
+            xonalar = Xona.objects.filter(bosh_joy_soni__gt=0)
         serializer = XonaSerializer(xonalar,many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = XonaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
 
 class XonaAPIView(APIView):
     def get(self, request, pk):
         xona = Xona.objects.get(id=pk)
         serializer = XonaSerializer(xona)
         return Response(serializer.data)
-
-    def delete(self, instance, pk):
-        xona = XonaSerializer.objects.filter(id=pk).delete()
-        data = {
-            "success": True,
-            "xabar": "Xona o'chirildi!"
-        }
-        return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
         xona = Xona.objects.get(id=pk)
